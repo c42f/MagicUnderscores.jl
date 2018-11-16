@@ -2,6 +2,8 @@
 
 A prototype implementation for underscore notation in julia.  See https://github.com/JuliaLang/julia/pull/24990#issuecomment-439232734.
 
+[![Build Status](https://travis-ci.org/c42f/MagicUnderscores.jl.svg?branch=master)](https://travis-ci.org/c42f/MagicUnderscores.jl)
+
 ## Quick Start
 
 Here's an example, showing how `_` can be used as a placeholder when using the
