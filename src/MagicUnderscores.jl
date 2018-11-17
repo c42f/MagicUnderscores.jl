@@ -11,20 +11,20 @@ Base.show(io::IO, p::Placeholder) = print(io, "_")
 
 (::Placeholder)(x) = x
 
-struct PartialApply{Func,Args}
+struct PartialApply{Func,Args} <: Function
     f::Func
     args::Args
 end
 Base.show(io::IO, p::PartialApply) = print(io, "$(p.f)($(join(sprint.(show,p.args), ",")))")
 
-struct TightPartialApply{Func,Arg1,Args}
+struct TightPartialApply{Func,Arg1,Args} <: Function
     f::Func
     arg1::Arg1
     args::Args
 end
 Base.show(io::IO, p::TightPartialApply) = print(io, "$(p.f)($(p.arg1), $(join(sprint.(show,p.args), ",")))")
 
-struct TightPartialApply2{Func,Arg1,Arg2,Args}
+struct TightPartialApply2{Func,Arg1,Arg2,Args} <: Function
     f::Func
     arg1::Arg1
     arg2::Arg2
@@ -104,15 +104,21 @@ function has_underscores(ex)
 end
 
 function lower_underscores(ex)
+    # Note that this is more complicated than it should be because it has to
+    # detect and handle special lowerings like getproperty
     if ex === :_
         return MagicUnderscores.Placeholder()
     elseif !(ex isa Expr)
         return ex
-    elseif has_underscores(ex) && ex.head == :call
-        return Expr(:call, MagicUnderscores.ubind, map(lower_underscores, ex.args)...)
-    else
-        return ex
+    elseif has_underscores(ex)
+        if ex.head == :call
+            return Expr(:call, MagicUnderscores.ubind, map(lower_underscores, ex.args)...)
+        elseif ex.head == :. && length(ex.args) == 2 && ex.args[2] isa QuoteNode
+            # getproperty
+            return lower_underscores(Expr(:call, :getproperty, ex.args...))
+        end
     end
+    return ex
 end
 
 """
@@ -136,10 +142,10 @@ end
 
 
 #-------------------------------------------------------------------------------
-# Override binding behaviour for for some Base functions
-for func in [:map, :filter]
-    @eval function ubind(::typeof($func), f, args...)
-        TightPartialApply($func, f, args)
+# Tight binding behaviour for for some Base functions
+for func in [:map, :filter, :findall]
+    @eval function ubind(::typeof($func), f, a, args...)
+        TightPartialApply($func, f, (a, args...))
     end
 end
 

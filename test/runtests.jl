@@ -13,4 +13,7 @@ using MagicUnderscores: lower_underscores
     @test @_([1,2] |> length) == 2
     @test @_([1,2,3,4] |> filter(_>2, _)) == [3,4]
     @test @_([1,2,3,4] |> filter(_>2, _) |> length) == 2
+
+    @test @_(map(_.a == 0, [(a=1, b=2), (a=0, b=2)])) == [false, true]
+    @test @_(findall(2*_ in (4,6), [1,2,3])) == [2,3]
 end
