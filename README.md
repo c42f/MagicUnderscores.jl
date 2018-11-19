@@ -1,6 +1,7 @@
 # MagicUnderscores
 
-A prototype implementation for underscore notation in julia.  See https://github.com/JuliaLang/julia/pull/24990#issuecomment-439232734.
+A prototype implementation for underscore notation in julia.
+Very likely too magic! But it was fun to explore - see https://github.com/JuliaLang/julia/pull/24990#issuecomment-439232734 and ensuing discussion.
 
 [![Build Status](https://travis-ci.org/c42f/MagicUnderscores.jl.svg?branch=master)](https://travis-ci.org/c42f/MagicUnderscores.jl)
 
@@ -12,19 +13,19 @@ Here's an example, showing how `_` can be used as a placeholder when using the
 ```julia
 julia> using MagicUnderscores
 
-julia> @_ map(sqrt(abs(_)) + 1, [-1,4])
-3-element Array{Float64,1}:
+julia> @_ map(sqrt(abs(_)) + _, [-1,4], [1,2])
+2-element Array{Float64,1}:
  2.0
- 3.0
+ 4.0
 ```
 
 In this case, this is just slightly shorter syntax for the following
 
 ```julia
-julia> map(x->sqrt(abs(x)) + 1, [-1,4])
-3-element Array{Float64,1}:
+julia> map((x,y)->sqrt(abs(x)) + y, [-1,4], [1,2])
+2-element Array{Float64,1}:
  2.0
- 3.0
+ 4.0
 ```
 
 The interesting thing about the approach taken in this package is that the
